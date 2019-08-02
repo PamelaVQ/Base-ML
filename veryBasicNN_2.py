@@ -84,7 +84,7 @@ def weights_by_features(W, x):
    The weights by features calculation function
    
    Arguments:
-   x -- input vector of dimension 2*1
+   x -- input vector of dimension 3*1
    W -- weight matrix
    
    Returns:
@@ -107,10 +107,16 @@ def networkRun(x, y, W1, W2):
    for count in range(200):
       #print("Iteration: " + str(count))
       input = np.random.choice(np.arange(len(x))) #randomly choose input for training
-      activation_layer1 = np.asmatrix(x[input]).T
-      z2 = np.asmatrix(weights_by_features(W1, x[input])).T #shape 4*1
+      x_input = np.concatenate([1], x[input])
+      print (x_input)
+      print (x[input])
+      print (len(x[input]))
+      break 
+      '''
+      activation_layer1 = np.asmatrix(x[input]).T # add extra variables for vector multiplcation with bias; shape 3*1
+      z2 = np.asmatrix(weights_by_features(W1, x[input])).T #shape 6*1
       #print ("z2: " + str(z2.shape))
-      activation_layer2 = sigmoid(z2) #shape 4*1
+      activation_layer2 = sigmoid(z2) #shape 6*1
       #print ("activation_layer2: " + str(activation_layer2.shape))
       z3 = weights_by_features(W2, activation_layer2) #shape 1*1
       #print ("z3: " + str(z3.shape))
@@ -121,18 +127,18 @@ def networkRun(x, y, W1, W2):
       print ("X: " + str(x[input]) + " Y: " + str(pred_y) + " Actual Y: " + str(y[input]))
       #run backpropogation to update weights
       delta_3 = end_loss(y[input], pred_y)
-      delta_2 = calculate_delta(W2, delta_3, activation_layer2) #shape 4*1
+      delta_2 = calculate_delta(W2, delta_3, activation_layer2) #shape 6*1
       #print ("delta_2: " + str(delta_2.shape))
-      W2 = backpropogate(W2, delta_3, activation_layer2) #shape 4*1
+      W2 = backpropogate(W2, delta_3, activation_layer2) #shape 6*1
       #print ("W2: " + str(W2.shape))
       delta_1 = calculate_delta(W1, delta_2, activation_layer1) #shape 1*1
       #print ("delta_1: " + str(delta_1.shape))
-      W1 = backpropogate(W1, delta_2, activation_layer1) #shape 2*4
+      W1 = backpropogate(W1, delta_2, activation_layer1) #shape 3*6
       #print ("W1: " + str(W1.shape))
-
+      '''
 #Learn the network by providing inputs and outputs of XOR gate
 x = np.array([[1,1],[0,0],[0,1],[1,0]])
 y = np.array([0,0,1,1])
-W1 = initialize_random(2, 4)
-W2 = initialize_random(4, 1)
+W1 = initialize_random(2, 6)
+W2 = initialize_random(6, 1)
 networkRun(x, y, W1, W2)
