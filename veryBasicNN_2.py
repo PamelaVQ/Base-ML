@@ -25,10 +25,10 @@ def initialize_parameters(n_x, network_dimensions):
    '''
    parameters = {}
    parameters['W1'] = np.random.randn(network_dimensions[0], n_x.shape[0]) * 0.01
-   parameters['b1'] = np.zeros((network_dimensions[0], 1))
+   parameters['b1'] = np.zeros((network_dimensions[0], n_x.shape[1]))
    for l in range(len(network_dimensions)-1):
       parameters['W' + str(l+2)] = np.random.randn(network_dimensions[l+1], network_dimensions[l]) * 0.01
-      parameters['b' + str(l+2)] = np.zeros((network_dimensions[l+1], 1))
+      parameters['b' + str(l+2)] = np.zeros((network_dimensions[l+1], n_x.shape[1]))
    return parameters
 
 def forward_propogation(x, parameters, L):
@@ -72,6 +72,7 @@ def cost_function(AL, Y):
    '''
    m = Y.shape[1]
    J = -(1/m) * (np.sum(np.multiply(Y, np.log(AL)) - np.multiply((1-Y), np.log(1-AL))))
+   #print (J)
    return J
    
 def relu_backward(dA, z):
@@ -118,18 +119,17 @@ def backward_propogation(Y, AL, parameters, activations, L):
    Returns:
    cache -- caching weigths dW, biases db for updating of parameters
    '''
-   m = Y.shape[1]
    cache = {}
    cache['dA' + str(L)] = -np.divide(Y, AL) + np.divide((1-Y), (1-AL))
    cache['dZ' + str(L)] = sigmoid_backward(cache['dA' + str(L)], activations['Z' + str(L)])
-   cache['dW' + str(L)] = (1/m) * np.dot(cache['dZ' + str(L)], activations['A' + str(L-1)].T)   
-   cache['db' + str(L)] = (1/m) * np.sum(cache['dZ' + str(L)], axis=1, keepdims=True)
+   cache['dW' + str(L)] = (1/activations['A' + str(L-1)].shape[1]) * np.dot(cache['dZ' + str(L)], activations['A' + str(L-1)].T)   
+   cache['db' + str(L)] = (1/activations['A' + str(L-1)].shape[1]) * np.sum(cache['dZ' + str(L)], axis=1, keepdims=True)
    cache['dA' + str(L-1)] = np.dot(parameters['W' + str(L)].T, cache['dZ' + str(L)])
    
    for l in range(L-1, 0, -1):
       cache['dZ' + str(l)] = relu_backward(cache['dA' + str(l)], activations['Z' + str(l)])
-      cache['dW' + str(l)] = (1/m) * np.dot(cache['dZ' + str(l)], activations['A' + str(l-1)].T)   
-      cache['db' + str(l)] = (1/m) * np.sum(cache['dZ' + str(l)], axis=1, keepdims=True)
+      cache['dW' + str(l)] = (1/activations['A' + str(l-1)].shape[1]) * np.dot(cache['dZ' + str(l)], activations['A' + str(l-1)].T)   
+      cache['db' + str(l)] = (1/activations['A' + str(l-1)].shape[1]) * np.sum(cache['dZ' + str(l)], axis=1, keepdims=True)
       cache['dA' + str(l-1)] = np.dot(parameters['W' + str(l)].T, cache['dZ' + str(l)])
    return cache 
 
@@ -154,7 +154,7 @@ def update_parameters(learning_rate, parameters, cache, L):
 def n_layer_neural_network(x, y, network_dimensions, learning_rate):
    L = len(network_dimensions)
    parameters = initialize_parameters(x, network_dimensions)
-   for i in range(1500):
+   for i in range(5000):
       AL, activations = forward_propogation(x, parameters, L)
       J = cost_function(AL, y)
       #print (J)
@@ -169,7 +169,7 @@ def predict_y(predicted_output):
 #Learn the network by providing inputs and outputs of XOR gate
 x = np.array([[1,1],[0,0],[0,1],[1,0]]).T #shape (2, 4)
 y = np.reshape([0,0,1,1], (1,4)) #shape (1, 4)
-network_dimensions = [6, 4, 2, 1]
+network_dimensions = [8, 4, 1]
 learning_rate = 0.01
 parameters = n_layer_neural_network(x, y, network_dimensions, learning_rate)
 #predict output
@@ -184,7 +184,8 @@ AL, activations = forward_propogation(x, parameters, L)
 J = cost_function(AL, y)
 cache = backward_propogation(y, AL, parameters, activations, L)
 parameters = update_parameters(learning_rate, parameters, cache, L)
-
+'''
+'''
 #print shape of the initialized parameters
 for key in parameters:
    print (key + " : " + str(parameters[key].shape))
